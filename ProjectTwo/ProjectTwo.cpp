@@ -18,6 +18,7 @@
 
 
 #include <iostream>
+#include <stdexcept>
 
 //Header files for input control and calculating. 
 #include "IOControls.h"
@@ -45,8 +46,10 @@ static void bankBanner() {
 
 //This function contains the main loop of the program.
 void runProgram() {
-    
+
+    string checkInput;
     char choice; //Used for y/n choice.
+    bool valid;
 
     //This do/while loop will initiate on start and then run again if the user enters 'y' to run another report.  
     do {
@@ -58,7 +61,7 @@ void runProgram() {
 #endif
         cout << "\033[1;32m"; //Sets the text to green in the console to match the client's vision.
         bankBanner(); //Displays the banner after the console is cleared. 
-        
+
         cout << "After each entry, press Enter to continue..." << endl;
         IOControls input; //IOControls Class is called, beginning the prompts.
 
@@ -73,22 +76,36 @@ void runProgram() {
         report.DisplayWithoutMonthlyDeposit();
         report.DisplayWithMonthlyDeposit();
 
+        cout << "\nWould you like to enter new values? (y/n).  This will clear the previous report: ";
+
         //This loop do/while loop will run until a user enters y/n. For input validation purposes.      
         do {
-            cout << "\nWould you like to enter new values? (y/n).  This will clear the previous report: ";
-            cin >> choice;
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            valid = true;
 
-            choice = tolower(choice); //converts the answer to lowercase for QOL. 
+            try {
+                getline(cin, checkInput);
 
-            if (choice != 'y' && choice != 'n') {
-                cout << "Invalid input. Please enter 'y' or 'n'.\n";
+                if (checkInput.empty()) {
+                    throw runtime_error("Input cannot be blank. Please enter (y/n).");
+                }
+
+                if (checkInput.length() > 1) {
+                    throw runtime_error("Please enter (y/n).");
+                }
+
+                choice = tolower(checkInput[0]);
+
+                if (choice != 'y' && choice != 'n') {
+                    throw runtime_error("Please enter (y/n).");
+                }
             }
-
-        } while (choice != 'y' && choice != 'n');
+            catch (const runtime_error& e) {
+                cerr << "Error: " << e.what();
+                valid = false;
+            }
+        } while (!valid);
 
     } while (choice == 'y');
-
 }
 
 //Main function with minimal code contained within it, per the company standards. 
